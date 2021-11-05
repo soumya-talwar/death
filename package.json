@@ -1,0 +1,14 @@
+{
+  "name": "death",
+  "version": "1.0.0",
+  "description": "a twitter bot that lives after my death as me",
+  "main": "bot.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "soumya talwar",
+  "license": "ISC",
+  "dependencies": {
+    "twit": "^2.2.11"
+  }
+}
