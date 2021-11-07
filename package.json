@@ -9,6 +9,7 @@
   "author": "soumya talwar",
   "license": "ISC",
   "dependencies": {
+    "node-fetch": "^2.0.0",
     "twit": "^2.2.11"
   }
 }
