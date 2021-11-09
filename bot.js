@@ -24,19 +24,22 @@ fetch("http://127.0.0.1:3000/text.txt")
     //   ngrams[gram].push(text.charAt(i + n));
     // }
     setInterval(() => tweet(generate()), 5000);
+    // console.log(generate());
   });
 
 function generate() {
   let result = [words[Math.floor(Math.random() * words.length)]];
   let length = result[0].length;
   let limit = Math.floor(Math.random() * (280 - 100) + 100);
-  do {
+  while (true) {
     let word = result[result.length - 1];
     let set = wordsets[word];
     let next = set[Math.floor(Math.random() * set.length)];
-    result.push(next);
     length += next.length + 1;
-  } while (length < limit)
+    if (length - 1 > limit)
+      break;
+    result.push(next);
+  }
   return (result.join(" "));
   // let text = "yoo";
   // for (let i = 0; i < Math.floor(Math.random() * (280 - 100) + 100); i++) {
