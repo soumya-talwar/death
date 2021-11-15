@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "node-fetch": "^2.0.0",
+    "rita": "^2.4.501",
     "twit": "^2.2.11"
   }
 }
