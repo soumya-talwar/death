@@ -1,41 +1,69 @@
-var tweets = [];
-var ngrams = {};
-var n = 3;
+var wordsets = [];
+var words = [];
+var friends = [];
 
 fetch("archive/data/tweet.json")
   .then(response => response.json())
   .then(dataset => {
     for (data of dataset) {
       let text = data.tweet.full_text;
-      if (!(/\bRT\b/).test(text)) {
-        text = text.split(/@\w+\b|https:\/\/t\.co\/\w+|\n/g).join(" ").toLowerCase();
-        text = text.split(/[\W\d_(\s\s+)]/g).join(" ").trim();
-        if (text.length > 0)
-          tweets.push(text);
+      if (!(/^RT\b/).test(text)) {
+        text = text.split(/[@#]\w+\b|https:\/\/t\.co\/\w+|\n/g).join(" ").trim().toLowerCase();
+        if (text.length > 0) {
+          let text2 = text.split(/[\W\d_]+/g);
+          for (word of text2) {
+            if (word.length > 0)
+              words.push(word);
+          }
+        }
       }
     }
     prepare();
-    setInterval(generate, 5000);
+    generate();
   });
 
 function prepare() {
-  for (let tweet of tweets) {
-    for (let i = 0; i < tweet.length - n - 1; i++) {
-      let gram = tweet.substring(i, i + n);
-      if (!ngrams[gram])
-        ngrams[gram] = [];
-      ngrams[gram].push(tweet.charAt(i + n));
+  for (let w = 1; w <= 3; w++) {
+    let wordset = {};
+    for (let i = 0; i < words.length - w; i++) {
+      let sequence = "";
+      for (let j = i; j < i + w; j++) {
+        sequence += words[j] + " ";
+      }
+      sequence = sequence.trim();
+      if (!wordset[sequence])
+        wordset[sequence] = [];
+      wordset[sequence].push(words[i + w]);
     }
+    wordsets[w - 1] = wordset;
   }
+  console.log(wordsets);
 }
 
 function generate() {
-  let text = "yoo";
-  for (let i = 0; i < Math.floor(Math.random() * (280 - 100) + 100); i++) {
-    let pos = text.substring(text.length - n, text.length);
-    if (!ngrams[pos])
+  let sequences = Object.keys(wordsets[2]);
+  let phrase = sequences[Math.floor(Math.random() * sequences.length)];
+  console.log("phrase: " + phrase);
+  let limit = Math.floor(Math.random() * (280 - 100) + 100);
+  console.log("limit: " + limit);
+  while (phrase.length < limit) {
+    let current = phrase.match(/\b\w+\s\w+\s\w+\b$/g);
+    console.log("current: " + current);
+    let set = wordsets[2][current];
+    if (!set) {
+      current = phrase.match(/\b\w+\s\w+\b$/g);
+      set = wordsets[1][current];
+      if (!set) {
+        current = phrase.match(/\b\w+\b$/g);
+        set = wordsets[0][current];
+      }
+    }
+    console.log("set: " + set);
+    let next = set[Math.floor(Math.random() * set.length)];
+    console.log("next: " + next);
+    if ((phrase + " " + next).length > limit)
       break;
-    text += ngrams[pos][Math.floor(Math.random() * ngrams[pos].length)];
+    phrase += " " + next;
   }
-  console.log(text);
+  console.log(phrase);
 }
