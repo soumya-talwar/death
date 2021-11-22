@@ -7,6 +7,8 @@ markov.sets[2] = {};
 markov.starts = [];
 markov.ends = [];
 
+var pos = {};
+
 fetch("http://127.0.0.1:3000/tweet.json")
   .then(response => response.json())
   .then(dataset => {
@@ -81,11 +83,8 @@ function generate() {
   console.log(RiTa.untokenize(text));
 }
 
-// deal with punctuation & spaces
-// deal with curiouscat tweets
-// multiple lines & full-stops
+
 // grammar with markov chains
-// make rules with existing grammar in tweets (pos with rita.js)
 // emotions affecting behaviour
 // words sorted by sentiment
 // tweets sorted by replies / threads / qrt

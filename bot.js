@@ -17,8 +17,7 @@ fetch("http://127.0.0.1:3000/tweet.json")
     let model = new RiTa.markov(3);
     sentences = sentences.splice(9000, 10000);
     model.addText(sentences);
-    console.log(model.generate(3));
-    // setInterval(() => tweet(model.generate()), 5000);
+    setInterval(() => tweet(model.generate()), 5000);
   });
 
 function tweet(text) {
