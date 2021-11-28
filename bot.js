@@ -1,24 +1,21 @@
-var twit = require("twit");
-var config = require("./config.js");
-var bot = twit(config);
-var RiTa = require("rita");
+const twit = require("twit");
+const config = require("./config.js");
+const bot = twit(config);
+const puppeteer = require("puppeteer");
 
-var fetch = require("node-fetch");
-fetch("http://127.0.0.1:3000/tweet.json")
-  .then(response => response.json())
-  .then(dataset => {
-    let sentences = [];
-    for (let data of dataset) {
-      let text = data.tweet.full_text;
-      text = text.split(/[@#]\w+|https:\/\/t\.co\/\w+|\n+/g).join(" ").trim().toLowerCase();
-      if (!(/^rt\b/).test(text) && text.length > 0)
-        sentences.push(text);
-    }
-    let model = new RiTa.markov(3);
-    sentences = sentences.splice(9000, 10000);
-    model.addText(sentences);
-    setInterval(() => tweet(model.generate()), 5000);
+setInterval(generate, 10000);
+
+async function generate() {
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+  await page.goto("http://127.0.0.1:3000/");
+  page.on("console", message => {
+    let text = message.text();
+    console.log(text);
+    if ((/^generated/).test(text))
+      browser.close();
   });
+}
 
 function tweet(text) {
   bot.post("statuses/update", {
@@ -28,5 +25,5 @@ function tweet(text) {
       console.log("something went wrong D:");
     else
       console.log("tweet sent! :D");
-  })
+  });
 }

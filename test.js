@@ -82,13 +82,3 @@ function generate() {
     text.push(start);
   console.log(RiTa.untokenize(text));
 }
-
-
-// grammar with markov chains
-// emotions affecting behaviour
-// words sorted by sentiment
-// tweets sorted by replies / threads / qrt
-// friends ranked by interaction & extracting their tweets based on closeness
-// reading new articles by api & calculating interest
-// images / art
-// direct messages / exploring trends
