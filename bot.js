@@ -11,9 +11,11 @@ async function generate() {
   await page.goto("http://127.0.0.1:3000/");
   page.on("console", message => {
     let text = message.text();
-    console.log(text);
-    if ((/^generated/).test(text))
+    if ((/^tweet:/).test(text)) {
+      text = text.substring(7);
+      tweet(text);
       browser.close();
+    }
   });
 }
 

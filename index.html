@@ -9,14 +9,32 @@
     <script src="https://unpkg.com/ml5@latest/dist/ml5.min.js"></script>
     <script>
       function setup() {
-        var start = "i love ";
-        const rnn = ml5.charRNN("./char-rnn/models/input");
-        rnn.generate({
-          seed: start,
-          temperature: 0.5,
-          length: 160
-        }, (error, result) => {
-          console.log("generated text: " + start + result.sample);
+        let sentences = loadStrings("http://127.0.0.1:3000/text/tweets.txt");
+        let starts = [];
+        for (sentence of sentences) {
+          let words = sentence.split(" ");
+          starts.push(words[0]);
+        }
+        let start = starts[Math.floor(Math.random() * starts.length)] + " ";
+        const charrnn = ml5.charRNN("./char-rnn/models/input", () => {
+          let tweet = "";
+          const sentiment = ml5.sentiment("movieReviews", () => {
+            let tweet = "";
+            charrnn.generate({
+              seed: start,
+              length: Math.floor(Math.random() * (280 - 100) + 100),
+              temperature: 0.5
+            }, (error, result) => {
+              if (error)
+                console.log(error);
+              else {
+                tweet = start + result.sample;
+                console.log("tweet: " + tweet);
+                let prediction = sentiment.predict(tweet).score;
+                console.log("prediction: " + prediction);
+              }
+            });
+          });
         });
       }
     </script>
