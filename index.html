@@ -5,37 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>death bot</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/rita/2.4.501/rita.js" integrity="sha512-TQiVcIaGGx6Ct1D/ghNQC/r6PsV+nLxOST0cCfk4kyw9300JDXuXZqdGGg63nlNn885/7GVZ2lBbRu9Nxz5QRA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js" integrity="sha512-N4kV7GkNv7QR7RX9YF/olywyIgIwNvfEe2nZtfyj73HdjCUkAfOBDbcuJ/cTaN04JKRnw1YG1wnUyNKMsNgg3g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://unpkg.com/ml5@latest/dist/ml5.min.js"></script>
     <script>
       function setup() {
-        let sentences = loadStrings("http://127.0.0.1:3000/text/tweets.txt");
-        let starts = [];
-        for (sentence of sentences) {
-          let words = sentence.split(" ");
-          starts.push(words[0]);
-        }
-        let start = starts[Math.floor(Math.random() * starts.length)] + " ";
-        const charrnn = ml5.charRNN("./char-rnn/models/input", () => {
-          let tweet = "";
-          const sentiment = ml5.sentiment("movieReviews", () => {
-            let tweet = "";
-            charrnn.generate({
-              seed: start,
-              length: Math.floor(Math.random() * (280 - 100) + 100),
-              temperature: 0.5
-            }, (error, result) => {
-              if (error)
-                console.log(error);
-              else {
-                tweet = start + result.sample;
-                console.log("tweet: " + tweet);
-                let prediction = sentiment.predict(tweet).score;
-                console.log("prediction: " + prediction);
-              }
+        // fetch("https://api.openweathermap.org/data/2.5/weather?lat=13.101556425270013&lon=77.57196329497141&units=metric&appid=3d410dbee551d99b36d71387bbe879ec")
+        //   .then(response => response.json())
+        //   .then(data => {
+        //     let weather = data.weather[0].description;
+        //     if ((/rain | thunderstorm/g).test(weather))
+        //       console.log("😭");
+        //     else
+        //       console.log("💛");
+        //   });
+        fetch("http://127.0.0.1:3000/text/tweets.txt")
+          .then(response => response.text())
+          .then(text => {
+            let sentences = RiTa.sentences(text);
+            let starts = [];
+            for (sentence of sentences) {
+              let words = sentence.split(" ");
+              starts.push(words[0]);
+            }
+            let start = starts[Math.floor(Math.random() * starts.length)] + " ";
+            const charrnn = ml5.charRNN("./char-rnn/models/input", () => {
+              let tweet = "";
+              const sentiment = ml5.sentiment("movieReviews", () => {
+                let tweet = "";
+                charrnn.generate({
+                  seed: start,
+                  length: Math.floor(Math.random() * (280 - 100) + 100),
+                  temperature: 0.5
+                }, (error, result) => {
+                  if (error)
+                    console.log(error);
+                  else {
+                    tweet = start + result.sample;
+                    console.log("tweet: " + tweet);
+                    let prediction = sentiment.predict(tweet).score;
+                    console.log("prediction: " + prediction);
+                  }
+                });
+              });
             });
           });
-        });
       }
     </script>
   </head>
