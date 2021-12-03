@@ -24,22 +24,27 @@
               let words = sentence.split(" ");
               starts.push(words[0]);
             }
-            console.log("text is fetched!");
           });
       }
 
-      async function generate() {
-        let tweet = "";
-        let start = starts[Math.floor(Math.random() * starts.length)] + " ";
-        await charrnn.generate({
-          seed: start,
-          length: Math.floor(Math.random() * (280 - 100) + 100),
-          temperature: 0.5
-        }, (error, result) => {
-          tweet = start + result.sample;
-          // let prediction = sentiment.predict(tweet).score;
-        });
-        return tweet;
+      async function generate(mood) {
+        mood = round(constrain(map(mood, -5, 5, 0, 1), 0, 1), 2);
+        let tweet, prediction;
+        let start = random(starts) + " ";
+        do {
+          await charrnn.generate({
+            seed: start,
+            length: floor(random(100, 200)),
+            temperature: 0.5
+          }, (error, result) => {
+            tweet = start + result.sample;
+            prediction = round(sentiment.predict(tweet).score, 2);
+          });
+        } while (abs(prediction - mood) >= 0.1)
+        return {
+          "text": tweet,
+          "sentiment": prediction
+        };
       }
     </script>
   </head>
