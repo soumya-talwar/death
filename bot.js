@@ -11,7 +11,8 @@ var browser, page;
   await page.goto("http://127.0.0.1:3000/");
   page.on("console", message => {
     let text = message.text();
-    console.log(text);
+    if (!(/webgl/gi).test(text))
+      console.log(text);
   });
 })();
 
@@ -29,6 +30,7 @@ var emojis = {
   "happy": ["😂", "🙃", "💛", "🥺", "🌼", "💜"],
   "sad": ["😭"]
 };
+
 var rain = false;
 var menstrual = false;
 
@@ -62,7 +64,7 @@ mention.on("tweet", tweet => {
     });
 });
 
-setInterval(analyse, 1000 * 20);
+setInterval(analyse, 1000 * 60 * 5);
 
 async function analyse() {
   let date = new Date();
