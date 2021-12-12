@@ -64,7 +64,7 @@ mention.on("tweet", tweet => {
     });
 });
 
-setInterval(analyse, 1000 * 60 * 5);
+setInterval(analyse, 1000 * 30);
 
 async function analyse() {
   let date = new Date();
@@ -74,7 +74,7 @@ async function analyse() {
     moods.excitement.value--;
     moods.selfdoubt.value++;
     menstrual = true;
-  } else if (day > 20 && day < 28 && menstrual) {
+  } else if ((day < 20 || day > 28) && menstrual) {
     console.log("exiting menstrual cycle :D");
     moods.excitement.value++;
     moods.selfdoubt.value--;
