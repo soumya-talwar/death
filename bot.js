@@ -16,6 +16,9 @@ var browser, page;
   });
 })();
 
+var interval = setInterval(activate, 1000 * 30);
+var excited, detached;
+
 var moods = {
   "excitement": {
     "weight": 2,
@@ -26,6 +29,7 @@ var moods = {
     "value": 2
   }
 };
+
 var emojis = {
   "happy": ["😂", "🙃", "💛", "🥺", "🌼", "💜"],
   "sad": ["😭"]
@@ -33,6 +37,7 @@ var emojis = {
 
 var rain = false;
 var menstrual = false;
+var cycle = [new Date(2021, 11, 18), new Date(2021, 11, 19), new Date(2021, 11, 20), new Date(2021, 11, 21)];
 
 var bts = bot.stream("statuses/filter", {
   follow: "335141638"
@@ -64,20 +69,33 @@ mention.on("tweet", tweet => {
     });
 });
 
-setInterval(analyse, 1000 * 30);
+function activate() {
+  let hour = new Date().date.getHours();
+  for (let i = 0; i < 50; i++) {
+    if (Math.floor(Math.random() * 24) > Math.min(Math.abs(hour - 0), Math.abs(hour - 24)))
+      analyse();
+  }
+}
 
 async function analyse() {
-  let date = new Date();
-  let day = date.getDate();
-  if (day > 20 && day < 28 && !menstrual) {
+  let day = new Date().setHours(0, 0, 0, 0);
+  let valid = false;
+  for (let date of cycle) {
+    if (date.getTime() === day.getTime())
+      valid == true;
+  }
+  if (valid && !menstrual) {
     console.log("entering menstrual cycle D:");
     moods.excitement.value--;
     moods.selfdoubt.value++;
     menstrual = true;
-  } else if ((day < 20 || day > 28) && menstrual) {
+  } else if (!valid && menstrual) {
     console.log("exiting menstrual cycle :D");
     moods.excitement.value++;
     moods.selfdoubt.value--;
+    for (let date of cycle) {
+      date.setDate(date.getDate() + 28);
+    }
     menstrual = false;
   }
   await fetch("https://api.openweathermap.org/data/2.5/weather?lat=13.101556425270013&lon=77.57196329497141&units=metric&appid=3d410dbee551d99b36d71387bbe879ec")
@@ -94,7 +112,6 @@ async function analyse() {
         rain = false;
       }
     });
-  generate();
 }
 
 async function generate(user) {
@@ -108,6 +125,21 @@ async function generate(user) {
     weights += moods[mood].weight;
   }
   let mood = wsum / weights;
+  if (mood > 1.5) {
+    if (!excited) {
+      console.log("excited!");
+      clearInterval(interval);
+      interval = setInterval(activate, 1000 * 60 * 5);
+      excited = true;
+      detached = false;
+    }
+  } else if (mood < 1.5 && !detached) {
+    console.log("detached!");
+    clearInterval(interval);
+    interval = setInterval(activate, 1000 * 60 * 60 * 5);
+    detached = true;
+    excited = false;
+  }
   let result = await page.evaluate((mood) => {
     return Promise.resolve(generate(mood));
   }, mood);
