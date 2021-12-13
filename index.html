@@ -1,0 +1,112 @@
+<html>
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>death bot</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/rita/2.4.501/rita.js" integrity="sha512-TQiVcIaGGx6Ct1D/ghNQC/r6PsV+nLxOST0cCfk4kyw9300JDXuXZqdGGg63nlNn885/7GVZ2lBbRu9Nxz5QRA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js" integrity="sha512-N4kV7GkNv7QR7RX9YF/olywyIgIwNvfEe2nZtfyj73HdjCUkAfOBDbcuJ/cTaN04JKRnw1YG1wnUyNKMsNgg3g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://unpkg.com/ml5@latest/dist/ml5.min.js"></script>
+    <script>
+      var markov = {};
+      markov.n = 3;
+      markov.sets = [];
+      markov.sets[0] = {};
+      markov.sets[1] = {};
+      markov.sets[2] = {};
+      markov.starts = [];
+      markov.ends = [];
+
+      var sentiment;
+
+      async function setup() {
+        fetch("http://127.0.0.1:3000/tweet.json")
+          .then(response => response.json())
+          .then(dataset => {
+            for (let data of dataset) {
+              let text = data.tweet.full_text;
+              let entities = {
+                "&amp;": "&",
+                "&lt;": "<",
+                "&gt;": ">"
+              };
+              text = text.split(/[@#]\w+|https:\/\/t\.co\/\w+|\n/g).join(" ").trim().toLowerCase().replace(/&.+;/g, match => entities[match]);
+              if (!(/^rt\b/g).test(text) && text.length > 0) {
+                let words = RiTa.tokenize(text);
+                markov.starts.push(words[0]);
+                for (let s = 1; s <= 3; s++) {
+                  for (let i = 0; i < words.length - s; i++) {
+                    let sequence = "";
+                    for (let j = i; j < i + s; j++) {
+                      sequence += words[j] + " ";
+                    }
+                    sequence = sequence.trim();
+                    if (!markov.sets[s - 1][sequence])
+                      markov.sets[s - 1][sequence] = [];
+                    markov.sets[s - 1][sequence].push(words[i + s]);
+                    if (i == words.length - s - 1 && s == 3)
+                      markov.ends.push(sequence.substring(sequence.indexOf(" ") + 1) + " " + words[i + s]);
+                  }
+                }
+              }
+            }
+          });
+        sentiment = ml5.sentiment("movieReviews", () => console.log("sentiment model ready!"));
+      }
+
+      async function generate(mood) {
+        mood = round(constrain(map(mood, -5, 5, 0, 1), 0, 1), 2);
+        let tweet, prediction;
+        do {
+          tweet = await iterate();
+          prediction = round(sentiment.predict(tweet).score, 2);
+        } while (abs(prediction - mood) >= 0.1)
+        return {
+          "text": tweet,
+          "sentiment": prediction
+        };
+      }
+
+      function iterate() {
+        let text = [];
+        let start = random(markov.starts);
+        let options = [];
+        for (sequence in markov.sets[2]) {
+          if (sequence.indexOf(start) == 0)
+            options.push(sequence);
+        }
+        if (options.length > 0) {
+          let option = random(options);
+          text = text.concat(option.split(" "));
+          let end = text.join(" ");
+          while (!markov.ends.includes(end)) {
+            let set = [];
+            let sequence1 = text[text.length - 3] + " " + text[text.length - 2] + " " + text[text.length - 1];
+            let set1 = markov.sets[2][sequence1];
+            if (set1)
+              set = set.concat(set1);
+            let sequence2 = text[text.length - 2] + " " + text[text.length - 1];
+            let set2 = markov.sets[1][sequence];
+            if (set2)
+              set = set.concat(set2);
+            if (set.length == 0) {
+              let sequence3 = text[text.length - 1];
+              let set3 = markov.sets[0][sequence];
+              if (set3)
+                set = set.concat(set3);
+            }
+            if (set.length == 0)
+              break;
+            let next = random(set);
+            text.push(next);
+            end = text[text.length - 3] + " " + text[text.length - 2] + " " + text[text.length - 1];
+          }
+        } else
+          text.push(start);
+        return RiTa.untokenize(text);
+      }
+    </script>
+  </head>
+
+</html>
