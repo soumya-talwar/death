@@ -70,7 +70,7 @@ mention.on("tweet", tweet => {
 });
 
 function activate() {
-  let hour = new Date().date.getHours();
+  let hour = new Date().getHours();
   if (Math.floor(Math.random() * 24) > Math.min(Math.abs(hour - 0), Math.abs(hour - 24)))
     analyse();
 }
