@@ -76,7 +76,8 @@ function activate() {
 }
 
 async function analyse() {
-  let day = new Date().setHours(0, 0, 0, 0);
+  let day = new Date();
+  day.setHours(0, 0, 0, 0);
   let valid = false;
   for (let date of cycle) {
     if (date.getTime() === day.getTime())
@@ -110,6 +111,7 @@ async function analyse() {
         rain = false;
       }
     });
+  generate();
 }
 
 async function generate(user) {
