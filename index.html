@@ -59,7 +59,6 @@
       async function generate(mood) {
         mood = round(constrain(map(mood, -5, 5, 0, 1), 0, 1), 2);
         let tweet, prediction;
-        let start = random(markov.starts) + " ";
         do {
           tweet = await iterate();
           prediction = round(sentiment.predict(tweet).score, 2);

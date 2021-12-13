@@ -71,10 +71,8 @@ mention.on("tweet", tweet => {
 
 function activate() {
   let hour = new Date().date.getHours();
-  for (let i = 0; i < 50; i++) {
-    if (Math.floor(Math.random() * 24) > Math.min(Math.abs(hour - 0), Math.abs(hour - 24)))
-      analyse();
-  }
+  if (Math.floor(Math.random() * 24) > Math.min(Math.abs(hour - 0), Math.abs(hour - 24)))
+    analyse();
 }
 
 async function analyse() {
@@ -85,12 +83,12 @@ async function analyse() {
       valid == true;
   }
   if (valid && !menstrual) {
-    console.log("entering menstrual cycle D:");
+    console.log("entering menstruating cycle D:");
     moods.excitement.value--;
     moods.selfdoubt.value++;
     menstrual = true;
   } else if (!valid && menstrual) {
-    console.log("exiting menstrual cycle :D");
+    console.log("exiting menstruating cycle :D");
     moods.excitement.value++;
     moods.selfdoubt.value--;
     for (let date of cycle) {
@@ -125,14 +123,12 @@ async function generate(user) {
     weights += moods[mood].weight;
   }
   let mood = wsum / weights;
-  if (mood > 1.5) {
-    if (!excited) {
-      console.log("excited!");
-      clearInterval(interval);
-      interval = setInterval(activate, 1000 * 60 * 5);
-      excited = true;
-      detached = false;
-    }
+  if (mood > 1.5 && !excited) {
+    console.log("excited!");
+    clearInterval(interval);
+    interval = setInterval(activate, 1000 * 60 * 5);
+    excited = true;
+    detached = false;
   } else if (mood < 1.5 && !detached) {
     console.log("detached!");
     clearInterval(interval);
