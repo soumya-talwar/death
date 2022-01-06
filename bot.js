@@ -8,7 +8,7 @@ var browser, page;
 (async () => {
   browser = await puppeteer.launch();
   page = await browser.newPage();
-  await page.goto("https://soumya-talwar.github.io/death/index.html");
+  await page.goto("http://127.0.0.1:3000/");
   page.on("console", message => {
     let text = message.text();
     if (!(/webgl/gi).test(text))

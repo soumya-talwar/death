@@ -21,7 +21,7 @@
       var sentiment;
 
       async function setup() {
-        fetch("./tweet.json")
+        fetch("./twitter/data/tweet.json")
           .then(response => response.json())
           .then(dataset => {
             for (let data of dataset) {
