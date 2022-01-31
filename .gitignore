@@ -1,5 +1,5 @@
 .DS_Store
+.env
 node_modules
 twitter
 char-rnn
-config.js
