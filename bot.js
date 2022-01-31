@@ -1,4 +1,5 @@
 const twit = require("twit");
+require("dotenv").config();
 const config = require("./config.js");
 const bot = twit(config);
 
